@@ -18,9 +18,37 @@
                   <source>label.back_to_list</source>
                   <target>Wróć do listy zakładek</target>
             </trans-unit>
+            <trans-unit id="message.no_bookmark">
+                  <source>message.no_bookmark</source>
+                  <target>Nie ma takiej zakładki</target>
+            </trans-unit>
             <trans-unit id="title.tags_list">
                    <source>title.tags_list</source>
                    <target>Lista tagów</target>
+            </trans-unit>
+            <trans-unit id="label.tag">
+                   <source>label.tag</source>
+                   <target>Zobacz tag</target>
+            </trans-unit>
+            <trans-unit id="title.tag_view">
+                <source>title.tag_view</source>
+                <target>Tag #%id%</target>
+            </trans-unit>
+            <trans-unit id="label.back_to_tag_list">
+                  <source>label.back_to_tag_list</source>
+                  <target>Wróć do listy tagów</target>
+            </trans-unit>
+            <trans-unit id="message.no_tag">
+                  <source>message.no_tag</source>
+                  <target>Nie ma takiego tagu</target>
+            </trans-unit>
+            <trans-unit id="labels.nav.next">
+                  <source>labels.nav.next</source>
+                  <target>Następna strona</target>
+            </trans-unit>
+            <trans-unit id="labels.nav.prev">
+                  <source>labels.nav.prev</source>
+                  <target>Poprzednia strona</target>
             </trans-unit>
         </body>
     </file>

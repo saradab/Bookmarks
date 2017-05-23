@@ -1,12 +1,12 @@
 {% extends 'layout.html.twig' %}
 
 {%  block title %}
-    {{ 'title.bookmark_view'|trans({'%id%': bookmark.id}) }}
+    {{ 'title.bookmark_view'|trans({'%id%': id }) }}
 {% endblock %}
 
 {%  block body %}
     <h1>
-        {{ 'title.bookmark_view'|trans({'%id%': bookmark.id}) }}
+        {{ 'title.bookmark_view'|trans({'%id%': id }) }}
     </h1>
     {%  if bookmark|length %}
         <div>
@@ -14,7 +14,7 @@
         </div>
     {%  else %}
         <div>
-            No bookmark found!
+            {{ 'message.no_bookmark'|trans }}
         </div>
     {% endif %}
     <a href="{{ url('bookmark_index') }}" title="{{ 'label.back_to_list'|trans }}">

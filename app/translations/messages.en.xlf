@@ -18,6 +18,38 @@
                  <source>label.back_to_list</source>
                  <target>Go back to the bookmark list</target>
             </trans-unit>
+            <trans-unit id="message.no_bookmark">
+                  <source>message.no_bookmark</source>
+                  <target>No bookmark found</target>
+            </trans-unit>
+            <trans-unit id="title.tags_list">
+                 <source>title.tags_list</source>
+                 <target>Tags list</target>
+            </trans-unit>
+            <trans-unit id="label.tag">
+                 <source>label.tag</source>
+                 <target>Go to the tag</target>
+            </trans-unit>
+            <trans-unit id="title.tag_view">
+                <source>title.tag_view</source>
+                <target>Tag #%id%</target>
+            </trans-unit>
+            <trans-unit id="label.back_to_tag_list">
+                  <source>label.back_to_tag_list</source>
+                  <target>Go back to the Tag list</target>
+            </trans-unit>
+            <trans-unit id="message.no_tag">
+                  <source>message.no_tag</source>
+                  <target>No tag found</target>
+            </trans-unit>
+            <trans-unit id="labels.nav.next">
+                  <source>labels.nav.next</source>
+                  <target>Next page</target>
+            </trans-unit>
+            <trans-unit id="labels.nav.prev">
+                  <source>labels.nav.prev</source>
+                  <target>Previous page</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

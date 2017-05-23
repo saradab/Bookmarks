@@ -8,18 +8,31 @@
     <h1>
         {{ 'title.bookmarks_list'|trans }}
     </h1>
-    {%  if bookmarks|length %}
+    {%  if paginator|length %}
         <ul>
-            {% for row in bookmarks %}
+            {% for row in paginator %}
             <li>{{ row.title }}, {{ row.url }}</li>
             <a href="{{ url('bookmark_view', {'id': row.id}) }}" title="{{ 'label.view'|trans }}">
                 {{ 'label.view'|trans }}
             </a>
+                <a href="{{ url('bookmark_edit', {'id': row.id}) }}" title="{{ 'edit.bookmark'|trans }}">
+                    {{ 'edit.bookmark'|trans }}
+                </a>
+                <a href="{{ url('bookmark_delete', {'id': row.id}) }}" title="{{ 'delete.bookmark'|trans }}">
+                    {{ 'delete.bookmark'|trans }}
+                </a>
             {% endfor %}
+            {%  include 'default/_paginator.html.twig' with {
+            paginator: paginator,
+            route_name: 'bookmark_index_paginated',
+            } %}
         </ul>
     {% else %}
         <div>
             List is empty!
         </div>
     {% endif %}
+    <a href="{{ url('bookmark_add') }}" title="{{ 'add.bookmark'|trans }}">
+        {{ 'add.bookmark'|trans }}
+    </a>
 {%  endblock %}

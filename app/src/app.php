@@ -8,6 +8,9 @@ use Silex\Provider\HttpFragmentServiceProvider;
 use Silex\Provider\LocaleServiceProvider;
 use Silex\Provider\TranslationServiceProvider;
 use Silex\Provider\DoctrineServiceProvider;
+use Silex\Provider\FormServiceProvider;
+use Silex\Provider\ValidatorServiceProvider;
+use Silex\Provider\SessionServiceProvider;
 
 $app = new Application();
 $app->register(new ServiceControllerServiceProvider());
@@ -46,9 +49,9 @@ $app->register(
         'db.options' => array(
             'driver'    => 'pdo_mysql',
             'host'      => 'localhost',
-            'dbname'    => '15_dabrowska',
-            'user'      => '15_dabrowska',
-            'password'  => 'C3x5d5f8t2',
+            'dbname'    => 'baza',
+            'user'      => 'user',
+            'password'  => 'user',
             'charset'   => 'utf8',
             'driverOptions' => array(
                 1002 => 'SET NAMES utf8',
@@ -56,4 +59,7 @@ $app->register(
         ),
     )
 );
+$app->register(new FormServiceProvider());
+$app->register(new ValidatorServiceProvider());
+$app->register(new SessionServiceProvider());
 return $app;

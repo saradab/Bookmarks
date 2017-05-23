@@ -8,18 +8,31 @@
     <h1>
         {{ 'title.tags_list'|trans }}
     </h1>
-    {%  if bookmarks|length %}
+    {%  if paginator|length %}
         <ul>
-            {% for row in bookmarks %}
-            <li>{{ row.title }}, {{ row.url }}</li>
-            <a href="{{ url('tag_view', {'id': row.id}) }}" title="{{ 'label.tag'|trans }}">
-                {{ 'label.tag|trans' }}
-            </a>
+            {% for row in paginator %}
+            <li>{{ row.id }}, {{ row.name }}</li>
+                <a href="{{ url('tag_view', {'id': row.id}) }}" title="{{ 'label.tag'|trans }}">
+                    {{ 'label.tag'|trans }}
+                </a>
+                <a href="{{ url('tag_edit', {'id': row.id}) }}" title="{{ 'edit.tag'|trans }}">
+                    {{ 'edit.tag'|trans }}
+                </a>
+                <a href="{{ url('tag_delete', {'id': row.id}) }}" title="{{ 'delete.tag'|trans }}">
+                    {{ 'delete.tag'|trans }}
+                </a>
             {% endfor %}
+            {%  include 'default/_paginator.html.twig' with {
+            paginator: paginator,
+            route_name: 'tag_index_paginated',
+            } %}
         </ul>
     {% else %}
         <div>
             List is empty!
         </div>
     {% endif %}
+    <a href="{{ url('tag_add') }}" title="{{ 'add.tag'|trans }}">
+        {{ 'add.tag'|trans }}
+    </a>
 {%  endblock %}
