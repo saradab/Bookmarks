@@ -6755,4 +6755,9 @@ button.close {
     display: none !important;
   }
 }
+
+.form-group label.control-label.required:after {
+  content: " *";
+  color: #a94442;;
+}
 /*# sourceMappingURL=bootstrap.css.map */

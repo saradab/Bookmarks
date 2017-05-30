@@ -131,6 +131,60 @@ class TagRepository
     }
 
     /**
+     * Find for uniqueness.
+     *
+     * @param string          $name Element name
+     * @param int|string|null $id   Element id
+     *
+     * @return array Result
+     */
+    public function findForUniqueness($name, $id = null)
+    {
+        $queryBuilder = $this->queryAll();
+        $queryBuilder->where('t.name = :name')
+            ->setParameter(':name', $name, \PDO::PARAM_STR);
+        if ($id) {
+            $queryBuilder->andWhere('t.id <> :id')
+                ->setParameter(':id', $id, \PDO::PARAM_INT);
+        }
+
+        return $queryBuilder->execute()->fetchAll();
+    }
+
+    /**
+     * Find one record by name.
+     *
+     * @param string $name Name
+     *
+     * @return array|mixed Result
+     */
+    public function findOneByName($name)
+    {
+        $queryBuilder = $this->queryAll();
+        $queryBuilder->where('t.name = :name')
+            ->setParameter(':name', $name, \PDO::PARAM_STR);
+        $result = $queryBuilder->execute()->fetch();
+
+        return !$result ? [] : $result;
+    }
+
+    /**
+     * Find tags by Ids.
+     *
+     * @param array $ids Tags Ids.
+     *
+     * @return array
+     */
+    public function findById($ids)
+    {
+        $queryBuilder = $this->queryAll();
+        $queryBuilder->where('t.id IN (:ids)')
+            ->setParameter(':ids', $ids, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+
+        return $queryBuilder->execute()->fetchAll();
+    }
+
+    /**
      * Query all records.
      *
      * @return \Doctrine\DBAL\Query\QueryBuilder Result

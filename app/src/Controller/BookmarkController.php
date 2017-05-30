@@ -9,6 +9,7 @@
 namespace Controller;
 
 use Repository\BookmarkRepository;
+use Repository\TagRepository;
 use Silex\Application;
 use Silex\Api\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,7 +98,11 @@ class BookmarkController implements ControllerProviderInterface
     {
         $bookmark = [];
 
-        $form = $app['form.factory']->createBuilder(BookmarkType::class, $bookmark)->getForm();
+        $form = $app['form.factory']->createBuilder(
+            BookmarkType::class,
+            $bookmark,
+            ['tag_repository' => new TagRepository($app['db'])]
+        )->getForm();
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {
@@ -151,7 +156,11 @@ class BookmarkController implements ControllerProviderInterface
             return $app->redirect($app['url_generator']->generate('bookmark_index'));
         }
 
-        $form = $app['form.factory']->createBuilder(BookmarkType::class, $bookmark)->getForm();
+        $form = $app['form.factory']->createBuilder(
+            BookmarkType::class,
+            $bookmark,
+            ['tag_repository' => new TagRepository($app['db'])]
+        )->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

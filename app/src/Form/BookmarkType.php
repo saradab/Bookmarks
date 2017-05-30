@@ -1,15 +1,19 @@
 <?php
 /**
- * Tag type.
+ * Bookmark type.
  */
 namespace Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Class TagType.
+ * Class BookmarkType.
  *
  * @package Form
  */
@@ -28,17 +32,91 @@ class BookmarkType extends AbstractType
                 'required' => true,
                 'attr' => [
                     'max_length' => 128,
-                ]
-            ])
-            ->add(
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(
+                        ['groups' => ['bookmark-default']]
+                    ),
+                    new Assert\Length(
+                        [
+                            'groups' => ['bookmark-default'],
+                            'min' => 3,
+                            'max' => 128,
+                        ]
+                    ),
+                ],
+            ]
+        );
+        $builder->add(
             'url',
-            TextType::class,
+            UrlType::class,
             [
                 'label' => 'label.url',
                 'required' => true,
                 'attr' => [
                     'max_length' => 128,
-                ]
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(
+                        ['groups' => ['bookmark-default']]
+                    ),
+                    new Assert\Length(
+                        [
+                            'groups' => ['bookmark-default'],
+                            'min' => 3,
+                            'max' => 128,
+                        ]
+                    ),
+                    new Assert\Url(
+                        ['groups' => ['bookmark-default']]
+                    ),
+                ],
+            ]
+        );
+        $builder->add(
+            'tags',
+            ChoiceType::class,
+            [
+                'label' => 'label.tags',
+                'required' => true,
+                'placeholder' => 'label.none',
+                'choices' => $this->prepareTagsForChoices($options['tag_repository']),
+            ]
+        );
+        $builder->add(
+            'is_public',
+            ChoiceType::class,
+            [
+                'label' => 'label.is_public',
+                'choices'  => [
+                    'label.no' => 0,
+                    'label.yes' => 1,
+                ],
+                'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank(
+                        ['groups' => ['bookmark-default']]
+                    ),
+                    new Assert\Choice(
+                        [
+                            'groups' => ['bookmark-default'],
+                            'choices' => [0, 1],
+                        ]
+                    ),
+                ],
+            ]
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults(
+            [
+                'validation_groups' => 'bookmark-default',
+                'tag_repository' => null,
             ]
         );
     }
@@ -49,5 +127,17 @@ class BookmarkType extends AbstractType
     public function getBlockPrefix()
     {
         return 'bookmark_type';
+    }
+
+    protected function prepareTagsForChoices($tagRepository)
+    {
+        $tags = $tagRepository->findAll();
+        $choices = [];
+
+        foreach ($tags as $tag) {
+            $choices[$tag['name']] = $tag['id'];
+        }
+
+        return $choices;
     }
 }

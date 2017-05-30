@@ -33,9 +33,23 @@ class BookmarkRepository
      *
      * @param \Doctrine\DBAL\Connection $db
      */
+
+    /**
+     * Tag repository.
+     *
+     * @var null|\Repository\TagRepository $tagRepository
+     */
+    protected $tagRepository = null;
+
+    /**
+     * TagRepository constructor.
+     *
+     * @param \Doctrine\DBAL\Connection $db
+     */
     public function __construct(Connection $db)
     {
         $this->db = $db;
+        $this->tagRepository = new TagRepository($db);
     }
 
     /**
@@ -82,33 +96,56 @@ class BookmarkRepository
     public function findOneById($id)
     {
         $queryBuilder = $this->queryAll();
-        $queryBuilder->where('t.id = :id')
-            ->setParameter(':id', $id);
+        $queryBuilder->where('b.id = :id')
+            ->setParameter(':id', $id, \PDO::PARAM_INT);
         $result = $queryBuilder->execute()->fetch();
 
-        return !$result ? [] : $result;
+        if ($result) {
+            // TODO: remove current() after multi select implementation
+            $result['tags'] = current($this->findLinkedTagsIds($result['id']));
+        }
+
+        return $result;
     }
+
     /**
      * Save record.
      *
-     * @param array $tag Tag
+     * @param array $bookmark Bookmark
      *
-     * @return boolean Result
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function save($bookmark)
     {
-        if (isset($bookmark['id']) && ctype_digit((string) $bookmark['id'])) {
-            // update record
-            $id = $bookmark['id'];
-            unset($bookmark['id']);
+        $this->db->beginTransaction();
 
-            return $this->db->update('si_bookmarks', $bookmark, ['id' => $id]);
-        } else {
-            // add new record
-            return $this->db->insert('si_bookmarks', $bookmark);
+        try {
+            $currentDateTime = new \DateTime();
+            $bookmark['modified_at'] = $currentDateTime->format('Y-m-d H:i:s');
+            $tagsIds = isset($bookmark['tags']) ? $bookmark['tags'] : [];
+            unset($bookmark['tags']);
+
+            if (isset($bookmark['id']) && ctype_digit((string) $bookmark['id'])) {
+                // update record
+                $bookmarkId = $bookmark['id'];
+                unset($bookmark['id']);
+                $this->removeLinkedTags($bookmarkId);
+                $this->addLinkedTags($bookmarkId, $tagsIds);
+                $this->db->update('si_bookmarks', $bookmark, ['id' => $bookmarkId]);
+            } else {
+                // add new record
+                $bookmark['created_at'] = $currentDateTime->format('Y-m-d H:i:s');
+
+                $this->db->insert('si_bookmarks', $bookmark);
+                $bookmarkId = $this->db->lastInsertId();
+                $this->addLinkedTags($bookmarkId, $tagsIds);
+            }
+            $this->db->commit();
+        } catch (DBALException $e) {
+            $this->db->rollBack();
+            throw $e;
         }
     }
-
     /**
      * Remove record.
      *
@@ -118,13 +155,26 @@ class BookmarkRepository
      */
     public function delete($bookmark)
     {
-        if(isset($bookmark['id']) && ctype_digit((string) $bookmark['id'])) {
-            return $this->db->delete('si_bookmarks', $bookmark);
-        } else {
-            throw new \InvalidArgumentException('Invalid parameter type');
+        try {
+            $this->removeLinkedTags($bookmark['id']);
+            $this->db->delete('si_bookmarks', ['id' => $bookmark['id']]);
+            $this->db->commit();
+        } catch (DBALException $e) {
+            $this->db->rollBack();
+            throw $e;
         }
     }
 
+    /**
+     * Query all records.
+     *
+     * @return \Doctrine\DBAL\Query\QueryBuilder Result
+     */
+    /**
+     * Query all records.
+     *
+     * @return \Doctrine\DBAL\Query\QueryBuilder Result
+     */
     /**
      * Query all records.
      *
@@ -134,7 +184,68 @@ class BookmarkRepository
     {
         $queryBuilder = $this->db->createQueryBuilder();
 
-        return $queryBuilder->select('t.id', 't.title', 't.url')
-            ->from('si_bookmarks', 't');
+        return $queryBuilder->select(
+            't.id',
+            't.created_at',
+            't.modified_at',
+            't.title',
+            't.url',
+            't.is_public'
+        )->from('si_bookmarks', 't');
+    }
+
+
+    /**
+     * Finds linked tags Ids.
+     *
+     * @param int $bookmarkId Bookmark Id
+     *
+     * @return array Result
+     */
+    protected function findLinkedTagsIds($bookmarkId)
+    {
+        $queryBuilder = $this->db->createQueryBuilder()
+            ->select('bt.tag_id')
+            ->from('si_bookmarks_tags', 'bt')
+            ->where('bt.bookmark_id = :bookmark_id')
+            ->setParameter(':bookmark_id', $bookmarkId, \PDO::PARAM_INT);
+        $result = $queryBuilder->execute()->fetchAll();
+
+        return isset($result) ? array_column($result, 'tag_id') : [];
+    }
+
+    /**
+     * Remove linked tags.
+     *
+     * @param int $bookmarkId Bookmark Id
+     *
+     * @return boolean Result
+     */
+    protected function removeLinkedTags($bookmarkId)
+    {
+        return $this->db->delete('si_bookmarks_tags', ['bookmark_id' => $bookmarkId]);
+    }
+
+    /**
+     * Add linked tags.
+     *
+     * @param int $bookmarkId Bookmark Id
+     * @param array $tagsIds Tags Ids
+     */
+    protected function addLinkedTags($bookmarkId, $tagsIds)
+    {
+        if (!is_array($tagsIds)) {
+            $tagsIds = [$tagsIds];
+        }
+
+        foreach ($tagsIds as $tagId) {
+            $this->db->insert(
+                'si_bookmarks_tags',
+                [
+                    'bookmark_id' => $bookmarkId,
+                    'tag_id' => $tagId,
+                ]
+            );
+        }
     }
 }
